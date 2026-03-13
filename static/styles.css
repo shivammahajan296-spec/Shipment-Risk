@@ -363,6 +363,11 @@ input[type="range"],
   color: #12714f;
 }
 
+.pill.success {
+  background: rgba(23, 166, 115, 0.16);
+  color: #12714f;
+}
+
 .status-watch {
   background: rgba(242, 169, 0, 0.16);
   color: #9c6a00;

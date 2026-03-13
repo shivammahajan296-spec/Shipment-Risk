@@ -46,10 +46,27 @@ function updateLlmStatus(message, isError = false) {
   return;
 }
 
+function renderLlmSettingsState() {
+  const input = document.getElementById("llmKeyInput");
+  const title = document.getElementById("llmSettingsTitle");
+  const pill = document.getElementById("llmSettingsPill");
+  const configured = Boolean(state.llmSettings?.configured);
+  const masked = state.llmSettings?.straive_api_key_masked || "";
+
+  title.textContent = configured ? "API Key Saved" : "Set API Key";
+  pill.textContent = configured ? "Saved" : "Gemini";
+  pill.className = `pill ${configured ? "success" : "info"}`;
+
+  if (!input.value) {
+    input.placeholder = configured && masked ? `Saved key: ${masked}` : "Enter Straive API key";
+  }
+}
+
 async function loadLlmSettings() {
   const result = await fetchJSON("/api/llm/settings");
   state.llmSettings = result;
   document.getElementById("llmKeyInput").value = "";
+  renderLlmSettingsState();
 }
 
 async function saveLlmSettings() {
@@ -68,6 +85,7 @@ async function saveLlmSettings() {
   });
   state.llmSettings = result;
   document.getElementById("llmKeyInput").value = "";
+  renderLlmSettingsState();
 }
 
 async function clearLlmSettings() {
@@ -76,6 +94,7 @@ async function clearLlmSettings() {
   });
   state.llmSettings = null;
   document.getElementById("llmKeyInput").value = "";
+  renderLlmSettingsState();
 }
 
 async function testLlmSettings() {
