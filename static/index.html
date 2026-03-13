@@ -53,6 +53,26 @@
           <button class="nav-item" data-target="simulator">Scenario Simulator</button>
           <button class="nav-item" data-target="value">Business Value</button>
         </nav>
+        <div class="sidebar-settings glass">
+          <button id="toggleLlmSettingsBtn" class="sidebar-settings-toggle" type="button">
+            <div>
+              <p class="eyebrow">Straive LLM</p>
+              <h3>Set API Key</h3>
+            </div>
+            <span class="pill info">Gemini</span>
+          </button>
+          <div id="llmSettingsBody" class="sidebar-settings-body hidden">
+            <label class="sidebar-field">
+              <span>API Key</span>
+              <input id="llmKeyInput" class="sidebar-input" type="password" placeholder="Enter Straive API key" />
+            </label>
+            <div class="action-btn-row sidebar-actions">
+              <button id="saveLlmSettingsBtn" class="primary-btn small-btn">Save Key</button>
+              <button id="testLlmSettingsBtn" class="ghost-btn">Test</button>
+              <button id="clearLlmSettingsBtn" class="ghost-btn">Clear</button>
+            </div>
+          </div>
+        </div>
         <div class="sidebar-footer glass">
           <span class="status-dot"></span>
           <div>

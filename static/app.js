@@ -5,6 +5,7 @@ const state = {
   overviewRiskFilter: "All",
   latestSimulation: null,
   copilotOpen: false,
+  llmSettings: null,
 };
 
 const panelMap = {
@@ -39,6 +40,51 @@ async function fetchJSON(url, options = {}) {
     throw new Error(`Request failed: ${response.status}`);
   }
   return response.json();
+}
+
+function updateLlmStatus(message, isError = false) {
+  return;
+}
+
+async function loadLlmSettings() {
+  const result = await fetchJSON("/api/llm/settings");
+  state.llmSettings = result;
+  document.getElementById("llmKeyInput").value = "";
+}
+
+async function saveLlmSettings() {
+  const payload = {
+    straive_api_key: document.getElementById("llmKeyInput").value.trim(),
+    straive_model: "gemini-2.5-pro",
+  };
+  if (!payload.straive_api_key) {
+    updateLlmStatus("API key is required to save Straive settings.", true);
+    return;
+  }
+  const result = await fetchJSON("/api/llm/settings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  state.llmSettings = result;
+  document.getElementById("llmKeyInput").value = "";
+}
+
+async function clearLlmSettings() {
+  await fetchJSON("/api/llm/settings/clear", {
+    method: "POST",
+  });
+  state.llmSettings = null;
+  document.getElementById("llmKeyInput").value = "";
+}
+
+async function testLlmSettings() {
+  const result = await fetchJSON("/api/llm/settings/test", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt: "Summarize the current network risk posture in one sentence." }),
+  });
+  updateLlmStatus(result.ok ? `Test successful: ${result.message}` : `Test failed: ${result.message}`, !result.ok);
 }
 
 function safeText(value) {
@@ -1149,6 +1195,25 @@ function bindEvents() {
     showLoader(false);
   });
 
+  document.getElementById("saveLlmSettingsBtn").addEventListener("click", () => {
+    showLoader(true);
+    saveLlmSettings().catch((error) => updateLlmStatus(error.message, true)).finally(() => showLoader(false));
+  });
+
+  document.getElementById("toggleLlmSettingsBtn").addEventListener("click", () => {
+    document.getElementById("llmSettingsBody").classList.toggle("hidden");
+  });
+
+  document.getElementById("clearLlmSettingsBtn").addEventListener("click", () => {
+    showLoader(true);
+    clearLlmSettings().catch((error) => updateLlmStatus(error.message, true)).finally(() => showLoader(false));
+  });
+
+  document.getElementById("testLlmSettingsBtn").addEventListener("click", () => {
+    showLoader(true);
+    testLlmSettings().catch((error) => updateLlmStatus(error.message, true)).finally(() => showLoader(false));
+  });
+
   document.getElementById("fileUpload").addEventListener("change", async (event) => {
     if (!event.target.files.length) return;
     const form = new FormData();
@@ -1162,6 +1227,7 @@ function bindEvents() {
 
 async function initializeDashboard() {
   showLoader(true);
+  await loadLlmSettings();
   const overview = await fetchJSON("/api/overview");
   state.overview = overview;
   state.shipments = overview.top_shipments;

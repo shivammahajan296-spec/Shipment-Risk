@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
-from app.models import CopilotRequest, ScenarioRequest, UploadResponse
+from app.models import CopilotRequest, LLMSettingsRequest, LLMTestRequest, ScenarioRequest, UploadResponse
 from app.services.platform_service import PlatformService
 
 
@@ -56,6 +56,33 @@ async def get_agents() -> dict:
 @app.post("/api/copilot")
 async def copilot(payload: CopilotRequest) -> dict:
     return await platform_service.copilot_answer(payload.question)
+
+
+@app.get("/api/llm/settings")
+async def get_llm_settings() -> dict:
+    return settings.llm_settings_view()
+
+
+@app.post("/api/llm/settings")
+async def save_llm_settings(payload: LLMSettingsRequest) -> dict:
+    settings.save_runtime_overrides(
+        straive_api_key=payload.straive_api_key,
+        straive_model=payload.straive_model,
+        use_mock_llm=False,
+    )
+    return {"status": "ok", **settings.llm_settings_view()}
+
+
+@app.post("/api/llm/settings/clear")
+async def clear_llm_settings() -> dict:
+    settings.clear_runtime_overrides()
+    return {"status": "ok", **settings.llm_settings_view()}
+
+
+@app.post("/api/llm/settings/test")
+async def test_llm_settings(payload: LLMTestRequest) -> dict:
+    result = await platform_service.llm_service.test_connection(payload.prompt)
+    return result
 
 
 @app.get("/api/shipments")

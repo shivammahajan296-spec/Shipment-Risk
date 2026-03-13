@@ -64,6 +64,31 @@ class LLMService:
             return self._mock_copilot(question, context)
         return await self.generate_grounded_summary(prompt, context)
 
+    async def test_connection(self, prompt: str) -> dict[str, Any]:
+        if not settings.straive_base_url or not settings.straive_api_key:
+            return {"ok": False, "message": "Missing Straive endpoint or API key."}
+
+        payload = {
+            "model": settings.straive_model,
+            "prompt": prompt,
+            "context": {"purpose": "connection_test"},
+        }
+        headers = {
+            "Authorization": f"Bearer {settings.straive_api_key}",
+            "Content-Type": "application/json",
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(settings.straive_base_url, headers=headers, json=payload)
+                response.raise_for_status()
+                body = response.json()
+                text = body.get("text") or body.get("output") or "Connected successfully."
+                return {"ok": True, "message": text}
+        except Exception as exc:
+            logger.warning("straive_llm_test_failure", extra={"error": str(exc)})
+            return {"ok": False, "message": str(exc)}
+
     def _mock_copilot(self, question: str, context: dict[str, Any]) -> str:
         top_driver = context.get("top_driver", "inventory shortage")
         top_warehouse = context.get("top_warehouse", "LAX-01")

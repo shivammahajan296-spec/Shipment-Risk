@@ -66,3 +66,12 @@ class UploadResponse(BaseModel):
 
 class CopilotRequest(BaseModel):
     question: str
+
+
+class LLMSettingsRequest(BaseModel):
+    straive_api_key: str
+    straive_model: str = "gemini-2.5-pro"
+
+
+class LLMTestRequest(BaseModel):
+    prompt: str = "Summarize the current network risk posture in one sentence."
