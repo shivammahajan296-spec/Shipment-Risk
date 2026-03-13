@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shipment Delay Risk Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  </head>
+  <body>
+    <div class="login-shell" id="loginShell">
+      <div class="login-card glass">
+        <div class="brand-row">
+          <div class="brand-logo">
+            <img src="/static/Straive_TM_Logo.jpg" alt="Straive logo" />
+          </div>
+          <div>
+            <p class="eyebrow">Straive-Solution</p>
+            <h1>Shipment Delay Risk Assessment and Prediction Platform</h1>
+          </div>
+        </div>
+        <p class="login-copy">
+          Enterprise control tower for predictive shipment risk, external disruption intelligence, and agent-driven operational recommendations.
+        </p>
+        <button id="enterAppBtn" class="primary-btn">Enter Control Tower</button>
+      </div>
+    </div>
+
+    <div class="app-shell hidden" id="appShell">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-logo">
+            <img src="/static/Straive_TM_Logo.jpg" alt="Straive logo" />
+          </div>
+          <div>
+            <p class="eyebrow">Straive-Solution</p>
+            <strong>Delay Risk Control Tower</strong>
+          </div>
+        </div>
+        <nav class="nav">
+          <button class="nav-item active" data-target="overview">Executive Overview</button>
+          <button class="nav-item" data-target="readiness">Data Quality Checks</button>
+          <button class="nav-item" data-target="discovery">Operational Risk Insights</button>
+          <button class="nav-item" data-target="risk">Shipment Risk Dashboard</button>
+          <button class="nav-item" data-target="disruption">Disruption Intelligence</button>
+          <button class="nav-item" data-target="actions">Operational Actions</button>
+          <button class="nav-item" data-target="simulator">Scenario Simulator</button>
+          <button class="nav-item" data-target="value">Business Value</button>
+        </nav>
+        <div class="sidebar-footer glass">
+          <span class="status-dot"></span>
+          <div>
+            <small>LLM Routing</small>
+            <strong>Straive Gemini 2.5 Pro</strong>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Operations Risk Intelligence</p>
+            <h2 id="pageTitle">Executive Overview</h2>
+          </div>
+          <div class="toolbar">
+            <label class="filter"><span>Warehouse</span><select id="warehouseFilter"></select></label>
+            <label class="filter"><span>Carrier</span><select id="carrierFilter"></select></label>
+            <label class="filter"><span>Priority</span><select id="priorityFilter"></select></label>
+            <button id="resetDemoBtn" class="secondary-btn">Reset Demo</button>
+            <a href="/api/export/shipments" class="upload-btn">Export Results</a>
+            <label class="upload-btn">
+              <input id="fileUpload" type="file" accept=".csv,.xlsx,.xls" hidden />
+              Upload Data
+            </label>
+          </div>
+        </header>
+
+        <section class="panel active" id="overviewPanel">
+          <div class="status-strip glass" id="globalStatusStrip"></div>
+          <div class="command-stage glass">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Executive Command Center</p>
+                <h3>Network Posture, Bottlenecks, and Intervention Paths</h3>
+              </div>
+              <div class="refresh-indicator" id="refreshIndicator">Live refresh</div>
+            </div>
+            <div id="commandSnapshot" class="command-snapshot-row"></div>
+          </div>
+          <div class="overview-grid command-insight-grid">
+            <div class="glass hero-card">
+              <div class="network-map-shell">
+                <div class="network-map-header">
+                  <div>
+                    <p class="eyebrow">Interactive Network Map</p>
+                    <h3>US Logistics Risk Topology</h3>
+                  </div>
+                  <div id="mapLegend" class="map-legend"></div>
+                </div>
+                <div id="networkMap" class="network-map"></div>
+              </div>
+            </div>
+            <div class="stack-col">
+              <div class="glass command-card">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">AI Insights</p>
+                    <h3>Executive Summary</h3>
+                  </div>
+                  <span class="pill info">AI</span>
+                </div>
+                <p id="executiveSummaryMini" class="summary-copy"></p>
+                <div id="overviewCompactSignals" class="feed"></div>
+              </div>
+            </div>
+          </div>
+          <div class="glass card root-cause-card root-cause-wide">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Risk Drivers</p>
+                <h3>Delay Root Cause Breakdown</h3>
+              </div>
+            </div>
+            <div class="root-cause-layout">
+              <div id="riskDriverDonut" class="chart compact-chart"></div>
+              <div id="riskDriverList" class="signal-list"></div>
+            </div>
+          </div>
+          <div class="kpi-grid" id="kpiGrid"></div>
+          <div class="overview-grid">
+            <div class="glass card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Shipment Risk Distribution</p>
+                  <h3>Risk Mix and Filter</h3>
+                </div>
+              </div>
+              <div id="riskDistribution" class="risk-distribution"></div>
+            </div>
+            <div class="glass card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">AI Recommended Actions</p>
+                  <h3>Decision Intelligence</h3>
+                </div>
+              </div>
+              <div id="aiActionsPanel" class="decision-card-grid"></div>
+            </div>
+          </div>
+          <div class="overview-grid">
+            <div class="glass hero-card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">30-Day Trend Analytics</p>
+                  <h3>Delay Rate, Risk Score, and Events</h3>
+                </div>
+              </div>
+              <div id="trendChart" class="chart"></div>
+            </div>
+            <div class="glass card">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Scenario Simulation</p>
+                  <h3>Test Disruption Impact</h3>
+                </div>
+              </div>
+              <div class="scenario-quick-grid" id="scenarioQuickGrid"></div>
+              <div id="scenarioImpactSummary" class="scorecard"></div>
+            </div>
+          </div>
+          <div class="glass card">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Shipment Exceptions</p>
+                <h3>Critical At-Risk Shipments</h3>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Shipment ID</th>
+                    <th>Lane</th>
+                    <th>Carrier</th>
+                    <th>Risk Score</th>
+                    <th>Reason</th>
+                    <th>ETA Impact</th>
+                    <th>Recommended Action</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="exceptionTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="readinessPanel">
+          <div class="overview-ribbon">
+            <div class="glass ribbon-card" id="qualityHeadline"></div>
+            <div class="glass ribbon-card" id="qualityCoverage"></div>
+            <div class="glass ribbon-card" id="qualityAlert"></div>
+          </div>
+          <div class="two-col">
+            <div class="glass card">
+              <div class="section-head"><div><p class="eyebrow">Quality Controls</p><h3>Validation Matrix</h3></div></div>
+              <div id="readinessChecklist" class="quality-grid"></div>
+            </div>
+            <div class="glass card">
+              <div class="section-head"><div><p class="eyebrow">Integrity Signals</p><h3>Quality Scorecard</h3></div></div>
+              <div id="readinessScorecard" class="scorecard"></div>
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="glass card">
+              <div class="section-head"><div><p class="eyebrow">Anomaly Monitor</p><h3>Detected Quality Risks</h3></div></div>
+              <div id="qualityIssues" class="feed"></div>
+            </div>
+            <div class="glass card">
+              <div class="section-head"><div><p class="eyebrow">Field Health</p><h3>Operational Coverage</h3></div></div>
+              <div id="qualityCoverageGrid" class="scorecard"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="discoveryPanel">
+          <div class="insight-stage glass">
+            <div class="insight-stage-main">
+              <p class="eyebrow">Operational Risk Story</p>
+              <h3 id="riskInsightHeadline">Where the network is breaking first</h3>
+              <p id="riskInsightNarrative" class="summary-copy"></p>
+              <div id="riskInsightStats" class="decision-stat-row"></div>
+            </div>
+            <div class="insight-stage-side">
+              <p class="eyebrow">Immediate Concentration</p>
+              <div id="riskFocusList" class="decision-priority-list"></div>
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Root Causes</p><h3>Delay Root Cause Breakdown</h3></div></div><div id="rootCauseSummary" class="detail-stat-row"></div><div id="rootCauseBreakout" class="signal-list"></div></div>
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Stress Concentration</p><h3>Warehouse and Carrier Pressure</h3></div></div><div id="stressMatrix" class="signal-list"></div></div>
+          </div>
+          <div class="two-col">
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Lane Intelligence</p><h3>Highest Risk Lanes</h3></div></div><div id="laneIntelligence" class="signal-list"></div></div>
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Heatmap</p><h3>Warehouse Risk Heatmap</h3></div></div><div id="warehouseHeatmap" class="heat-strip"></div></div>
+          </div>
+        </section>
+
+        <section class="panel" id="actionsPanel">
+          <div class="two-col">
+            <div class="glass card">
+              <div class="section-head"><div><p class="eyebrow">Critical Alerts</p><h3>Operational Alert Center</h3></div></div>
+              <div id="alertCenter" class="feed"></div>
+              <div id="timelineFeed" class="timeline"></div>
+            </div>
+            <div class="glass card">
+              <div class="section-head"><div><p class="eyebrow">Decision Engine</p><h3>Recommended Action Impact</h3></div></div>
+              <div id="actionSimulationCards" class="scorecard"></div>
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="glass card">
+              <div class="section-head"><div><p class="eyebrow">Recommended Actions</p><h3>Decision Intelligence Options</h3></div></div>
+              <div id="decisionEngine" class="decision-card-grid"></div>
+              <div id="actionExecutionFeed" class="feed action-console"></div>
+            </div>
+            <div class="glass card">
+              <div class="section-head"><div><p class="eyebrow">Operational Playbooks</p><h3>Automation Rules</h3></div></div>
+              <div id="playbookRules" class="feed"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="riskPanel">
+          <div class="glass card">
+            <div class="section-head">
+              <div><p class="eyebrow">Shipment Scoring Dashboard</p><h3>High-Risk Shipment Queue</h3></div>
+              <input id="shipmentSearch" class="search-input" placeholder="Search shipment, order, carrier, destination" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Shipment ID</th>
+                    <th>Destination</th>
+                    <th>Carrier</th>
+                    <th>Warehouse</th>
+                    <th>Risk</th>
+                    <th>Band</th>
+                    <th>Driver</th>
+                    <th>External Overlay</th>
+                    <th>Action</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="shipmentTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="disruptionPanel">
+          <div class="two-col">
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Regional Signals</p><h3>External Disruption Severity</h3></div></div><div id="regionSeveritySummary" class="detail-stat-row"></div><div id="regionSeverityFeed" class="signal-list"></div></div>
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Intelligence Feed</p><h3>Alert Center</h3></div></div><div id="alertFeed" class="feed"></div></div>
+          </div>
+          <div class="two-col">
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Digital Twin</p><h3>Network Risk Graph</h3></div></div><div id="networkGraph" class="network-graph"></div></div>
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Signal Connectors</p><h3>Live Intelligence Sources</h3></div></div><div id="signalProviders" class="feed"></div></div>
+          </div>
+        </section>
+
+        <section class="panel" id="valuePanel">
+          <div class="two-col">
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Financial Exposure</p><h3>Delay Cost and Penalty Risk</h3></div></div><div id="financialExposure" class="scorecard"></div></div>
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Business Value</p><h3>Operational and Strategic Outcomes</h3></div></div><div id="longTermValue" class="value-list"></div></div>
+          </div>
+          <div class="two-col">
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Executive Narrative</p><h3>AI Business Brief</h3></div></div><p id="executiveNarrative" class="summary-copy"></p></div>
+            <div class="glass card"><div class="section-head"><div><p class="eyebrow">Learning Loop</p><h3>Prediction vs Outcome</h3></div></div><div id="learningLoop" class="scorecard"></div></div>
+          </div>
+        </section>
+
+        <section class="panel" id="simulatorPanel">
+          <div class="two-col">
+            <div class="glass card">
+              <div class="section-head"><div><p class="eyebrow">Scenario Controls</p><h3>Disruption Simulator</h3></div></div>
+              <div class="sim-controls">
+                <label><span>Scenario</span><select id="scenarioType"></select></label>
+                <label><span>Region / Warehouse / Carrier</span><select id="scenarioEntity"></select></label>
+                <label><span>Severity</span><input id="scenarioSeverity" type="range" min="1" max="5" value="3" /></label>
+                <button id="runScenarioBtn" class="primary-btn">Run Simulation</button>
+              </div>
+              <div id="scenarioSummary" class="scorecard"></div>
+            </div>
+            <div class="glass card">
+              <div class="section-head"><div><p class="eyebrow">Impacted Shipments</p><h3>Scenario Output</h3></div></div>
+              <div id="scenarioResults" class="feed"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="loader hidden" id="loader">Loading control tower intelligence...</div>
+    <button id="copilotLauncher" class="copilot-launcher" aria-label="Open AI Copilot">AI</button>
+    <div class="modal hidden" id="shipmentModal">
+      <div class="modal-card glass">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Shipment Explainability</p>
+            <h3 id="modalTitle">Shipment Detail</h3>
+          </div>
+          <button id="closeModalBtn" class="secondary-btn">Close</button>
+        </div>
+        <div id="modalBody" class="modal-body"></div>
+      </div>
+    </div>
+    <div class="modal hidden" id="copilotModal">
+      <div class="modal-card glass copilot-modal-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">AI Copilot</p>
+            <h3>Ask The Control Tower</h3>
+          </div>
+          <button id="closeCopilotBtn" class="secondary-btn">Close</button>
+        </div>
+        <div id="copilotPromptTray" class="detail-chip-row"></div>
+        <div class="copilot-shell">
+          <div id="agentStatus" class="agent-status-grid"></div>
+          <div id="copilotFeed" class="feed"></div>
+          <div class="copilot-input-row">
+            <input id="copilotInput" class="search-input" placeholder="Why are delays increasing?" />
+            <button id="copilotSendBtn" class="primary-btn">Ask</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+  </html>
